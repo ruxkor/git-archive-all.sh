@@ -1,16 +1,16 @@
 #!/bin/bash -
 #
-# File:        git-archive-all.sh
+# File:        git archive-all.sh
 #
 # Description: A utility script that builds an archive file(s) of all
 #              git repositories and submodules in the current path.
 #              Useful for creating a single tarfile of a git super-
 #              project that contains other submodules.
 #
-# Examples:    Use git-archive-all.sh to create archive distributions
+# Examples:    Use git archive-all.sh to create archive distributions
 #              from git repositories. To use, simply do:
 #
-#                  cd $GIT_DIR; git-archive-all.sh
+#                  cd $GIT_DIR; git archive-all.sh
 #
 #              where $GIT_DIR is the root of your git superproject.
 #
@@ -67,7 +67,7 @@ function usage () {
     echo "    using the passed parameters, described below."
     echo
     echo "    If '--format' is specified, the archive is created with the named"
-    echo "    git archiver backend. Obviously, this must be a backend that git-archive"
+    echo "    git archiver backend. Obviously, this must be a backend that git archive"
     echo "    understands. The format defaults to 'tar' if not specified."
     echo
     echo "    If '--prefix' is specified, the archive's superproject and all submodules"
@@ -165,8 +165,8 @@ elif [ `git config -l | grep -q '^core\.bare=false'; echo $?` -ne 0 ]; then
     exit
 fi
 
-# Create the superproject's git-archive
-git-archive --format=$FORMAT --prefix="$PREFIX" $TREEISH > $TMPDIR/$(basename $(pwd)).$FORMAT
+# Create the superproject's git archive
+git archive --format=$FORMAT --prefix="$PREFIX" $TREEISH > $TMPDIR/$(basename $(pwd)).$FORMAT
 echo $TMPDIR/$(basename $(pwd)).$FORMAT >| $TMPFILE # clobber on purpose
 superfile=`head -n 1 $TMPFILE`
 
@@ -174,9 +174,9 @@ superfile=`head -n 1 $TMPFILE`
 find . -name '.git' -type d -print | sed -e 's/^\.\///' -e 's/\.git$//' | grep -v '^$' >> $TOARCHIVE
 
 while read path; do
-    TREEISH=$(git-submodule | grep "^ .*${path%/} " | cut -d ' ' -f 2) # git-submodule does not list trailing slashes in $path
+    TREEISH=$(git submodule | grep "^ .*${path%/} " | cut -d ' ' -f 2) # git submodule does not list trailing slashes in $path
     cd "$path"
-    git-archive --format=$FORMAT --prefix="${PREFIX}$path" ${TREEISH:-HEAD} > "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT
+    git archive --format=$FORMAT --prefix="${PREFIX}$path" ${TREEISH:-HEAD} > "$TMPDIR"/"$(echo "$path" | sed -e 's/\//./g')"$FORMAT
     if [ $FORMAT == 'zip' ]; then
         # delete the empty directory entry; zipped submodules won't unzip if we don't do this
         zip -d "$(tail -n 1 $TMPFILE)" "${PREFIX}${path%/}" >/dev/null # remove trailing '/'
